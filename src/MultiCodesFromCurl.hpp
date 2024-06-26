@@ -32,7 +32,7 @@ static constexpr std::array s_conv_table
 
 } // namespace MultiCodesFromCurl
 
-constexpr MultiCode convertMultiCodeToCurl(const CURLMcode src) 
+constexpr MultiCode convertMultiCodeFromCurl(const CURLMcode src) 
 {
     for (auto pair : MultiCodesFromCurl::s_conv_table)
     {

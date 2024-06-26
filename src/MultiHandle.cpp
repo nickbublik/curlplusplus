@@ -59,7 +59,7 @@ MultiCode MultiHandle::addEasyHandle(std::shared_ptr<EasyHandle> easy_handle) no
 
     auto curl_res = curl_multi_add_handle(curl_multi_handle, curl_easy_handle);
 
-    return convertMultiCodeToCurl(curl_res);
+    return convertMultiCodeFromCurl(curl_res);
 }
 
 MultiCode MultiHandle::removeEasyHandle(std::shared_ptr<EasyHandle> easy_handle) noexcept
@@ -69,8 +69,17 @@ MultiCode MultiHandle::removeEasyHandle(std::shared_ptr<EasyHandle> easy_handle)
 
     auto curl_res = curl_multi_remove_handle(curl_multi_handle, curl_easy_handle);
 
-    return convertMultiCodeToCurl(curl_res);
+    return convertMultiCodeFromCurl(curl_res);
 }
 
+std::pair<MultiCode, unsigned> MultiHandle::perform() noexcept
+{
+    CURLM* curl_multi_handle = getHandle();
+    int running_easy_handles = 0;
+
+    auto curl_res = curl_multi_perform(curl_multi_handle, &running_easy_handles);
+
+    return { convertMultiCodeFromCurl(curl_res), running_easy_handles };
+}
 
 } // namespace CurlWrapper

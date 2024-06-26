@@ -7,10 +7,9 @@
 #include "EasyHandleBuilder.hpp"
 #include "MultiHandle.hpp"
 
-void log_event(const CURLMcode mc)
+void log_event(const MultiCode mc)
 {
-    auto err_str = curl_multi_strerror(mc);
-    std::cout << err_str << "\n";
+    std::cout << mc << "\n";
 }
 
 int main(int /*argc*/, char** /*argv[]*/)
@@ -35,19 +34,24 @@ int main(int /*argc*/, char** /*argv[]*/)
 
     int i = 0;
 
-    while (is_running) 
+    int num_of_running_handles = 1;
+
+    while (num_of_running_handles) 
     {
         CURLMcode mc = curl_multi_perform(multi_handle->getHandle(), &is_running);
 
-        if (mc)
+        MultiCode res;
+        std::tie(res, num_of_running_handles) = multi_handle->perform();
+
+        if (res)
         {
-            log_event(mc);
+            log_event(res);
             break;
         }
         
         if (is_running)
         {
-            mc = curl_multi_poll(
+            res = curl_multi_poll(
                     multi_handle->getHandle(),
                     nullptr,
                     0,
@@ -55,9 +59,9 @@ int main(int /*argc*/, char** /*argv[]*/)
                     nullptr);
         }
         
-        if (mc)
+        if (res)
         {
-            log_event(mc);
+            log_event(res);
             break;
         }
 
