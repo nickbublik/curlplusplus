@@ -88,4 +88,20 @@ EasyHandleBuilder& EasyHandleBuilder::addOptionSList(
     return *this;
 }
 
+EasyHandleBuilder& EasyHandleBuilder::addOptionWriteCallback(
+    const EasyOption opt,
+    WriteCallbackFPtr param)
+{
+    CURL* curl_handle = m_impl->handle->getHandle();
+
+    auto res = curl_easy_setopt(curl_handle, convertOptToCurl(opt), param);
+
+    if (res != CURLE_OK)
+    {
+        failSetOption(opt);
+    }
+
+    return *this;
+}
+
 } // namespace CurlWrapper

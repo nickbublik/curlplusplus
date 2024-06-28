@@ -82,4 +82,16 @@ std::pair<MultiCode, unsigned> MultiHandle::perform() noexcept
     return { convertMultiCodeFromCurl(curl_res), running_easy_handles };
 }
 
+MultiCode MultiHandle::poll(const std::chrono::milliseconds& timeout) noexcept
+{
+    auto curl_res = curl_multi_poll(
+            getHandle(),
+            nullptr,
+            0,
+            static_cast<int>(timeout.count()),
+            nullptr);
+
+    return convertMultiCodeFromCurl(curl_res);
+}
+
 } // namespace CurlWrapper

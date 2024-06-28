@@ -7,29 +7,38 @@
 #include "EasyHandleBuilder.hpp"
 #include "MultiHandle.hpp"
 
-void log_event(const MultiCode mc)
+void log_event(const CurlWrapper::MultiCode mc)
 {
-    std::cout << mc << "\n";
+    std::cout << static_cast<int>(mc) << "\n";
+}
+
+static size_t write_cb(char *data, size_t n, size_t l, void *userp)
+{
+    std::cout << "write_cb : n = " << n << ", l = " << l << std::endl;
+    (void)data;
+    (void)userp;
+    return n*l;
 }
 
 int main(int /*argc*/, char** /*argv[]*/)
 {
     using namespace CurlWrapper;
 
-    int is_running = 1; /* keep number of running handles */
-
     std::chrono::milliseconds poll_timeout {10};
     
     CURLMsg *msg; /* for picking up messages with the transfer status */
     int msgs_left; /* how many messages are left */
 
+    const std::string c_url{"https://example.com"};
+
     EasyHandleBuilder easy_builder;
 
-    easy_builder.addOptionString(EasyOption::URL, std::string("https://example.com"));
+    easy_builder.addOption(EasyOption::URL, c_url);
+    easy_builder.addOption(EasyOption::WRITEFUNCTION, write_cb);
     std::shared_ptr<EasyHandle> easy_handle = easy_builder.build();
 
     std::unique_ptr<MultiHandle> multi_handle = std::make_unique<MultiHandle>();
-    
+
     multi_handle->addEasyHandle(easy_handle);
 
     int i = 0;
@@ -38,28 +47,21 @@ int main(int /*argc*/, char** /*argv[]*/)
 
     while (num_of_running_handles) 
     {
-        CURLMcode mc = curl_multi_perform(multi_handle->getHandle(), &is_running);
-
         MultiCode res;
         std::tie(res, num_of_running_handles) = multi_handle->perform();
 
-        if (res)
+        if (res != MultiCode::OK)
         {
             log_event(res);
             break;
         }
         
-        if (is_running)
+        if (num_of_running_handles)
         {
-            res = curl_multi_poll(
-                    multi_handle->getHandle(),
-                    nullptr,
-                    0,
-                    static_cast<unsigned int>(poll_timeout.count()),
-                    nullptr);
+            res = multi_handle->poll(poll_timeout);
         }
         
-        if (res)
+        if (res != MultiCode::OK)
         {
             log_event(res);
             break;
@@ -85,6 +87,6 @@ int main(int /*argc*/, char** /*argv[]*/)
             std::cout << "HTTP transfer completed with status " << msg->data.result << '\n';
         }
     }
-    
+
     return 0;
 }

@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <iostream>
 
 #include "EasyOptions.hpp"
 #include "SList.hpp"
@@ -21,22 +22,29 @@ public:
 
     std::unique_ptr<EasyHandle> build() noexcept;
 
+    using WriteCallbackFPtr = size_t (*)(char*, size_t, size_t, void*);
+
     EasyHandleBuilder& addOptionVoidPtr(const EasyOption opt, void* param);
     EasyHandleBuilder& addOptionString(const EasyOption opt, const std::string& param);
     EasyHandleBuilder& addOptionSList(const EasyOption opt, SList* param);
+    EasyHandleBuilder& addOptionWriteCallback(const EasyOption opt, WriteCallbackFPtr param);
 
     template<typename Parameter>
-    EasyHandleBuilder& addOption(const EasyOption opt, const Parameter& param)
+    constexpr EasyHandleBuilder& addOption(const EasyOption opt, const Parameter& param)
     {   
-        if (std::is_same_v<Parameter, std::string>)
+        if constexpr (std::is_function_v<Parameter>)
+        {
+            return addOptionWriteCallback(opt, param);
+        }
+        else if constexpr (std::is_same_v<Parameter, std::string>)
         {
             return addOptionString(opt, param);
         }
-        else if (std::is_same_v<Parameter, void*>)
+        else if constexpr (std::is_same_v<Parameter, void*>)
         {
-            return addOptionString(opt, param);
+            return addOptionVoidPtr(opt, param);
         }
-        else if (std::is_same_v<Parameter, SList*>)
+        else if constexpr (std::is_same_v<Parameter, SList*>)
         {
             return addOptionSList(opt, param);
         }
