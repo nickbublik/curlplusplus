@@ -24,11 +24,6 @@ public:
 
     using WriteCallbackFPtr = size_t (*)(char*, size_t, size_t, void*);
 
-    EasyHandleBuilder& addOptionVoidPtr(const EasyOption opt, void* param);
-    EasyHandleBuilder& addOptionString(const EasyOption opt, const std::string& param);
-    EasyHandleBuilder& addOptionSList(const EasyOption opt, SList* param);
-    EasyHandleBuilder& addOptionWriteCallback(const EasyOption opt, WriteCallbackFPtr param);
-
     template<typename Parameter>
     constexpr EasyHandleBuilder& addOption(const EasyOption opt, const Parameter& param)
     {   
@@ -51,6 +46,12 @@ public:
 
         return *this;
     }
+
+private:
+    EasyHandleBuilder& addOptionVoidPtr(const EasyOption opt, void* param);
+    EasyHandleBuilder& addOptionString(const EasyOption opt, const std::string& param);
+    EasyHandleBuilder& addOptionSList(const EasyOption opt, SList* param);
+    EasyHandleBuilder& addOptionWriteCallback(const EasyOption opt, WriteCallbackFPtr param);
 
 private:
     std::unique_ptr<Impl> m_impl;

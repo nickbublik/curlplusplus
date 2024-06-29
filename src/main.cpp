@@ -1,7 +1,6 @@
 #include <iostream>
 #include <chrono>
-
-#include <curl/curl.h>
+#include <sstream>
 
 #include "EasyHandle.hpp"
 #include "EasyHandleBuilder.hpp"
@@ -12,11 +11,19 @@ void log_event(const CurlWrapper::MultiCode mc)
     std::cout << static_cast<int>(mc) << "\n";
 }
 
+std::stringstream ss;
+
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)
 {
     std::cout << "write_cb : n = " << n << ", l = " << l << std::endl;
     (void)data;
     (void)userp;
+
+    for (size_t i = 0; i < l; ++i)
+    {
+        ss << data[i];
+    }
+
     return n*l;
 }
 
@@ -26,9 +33,6 @@ int main(int /*argc*/, char** /*argv[]*/)
 
     std::chrono::milliseconds poll_timeout {10};
     
-    CURLMsg *msg; /* for picking up messages with the transfer status */
-    int msgs_left; /* how many messages are left */
-
     const std::string c_url{"https://example.com"};
 
     EasyHandleBuilder easy_builder;
@@ -73,20 +77,26 @@ int main(int /*argc*/, char** /*argv[]*/)
 
     /* See how the transfers went */
     /* !checksrc! disable EQUALSnullptr 1 */
-    while((msg = curl_multi_info_read(multi_handle->getHandle(), &msgs_left)) != nullptr) 
+
+
+    Message message;
+    unsigned messages_left = 0;
+
+    std::tie(message, messages_left) = multi_handle->info_read();
+
+    while (messages_left != 0) 
     {
-        if (msg->msg == CURLMSG_DONE) 
+        if (message.completed) 
         {
-            //int found = (msg->easy_handle == handle);
-
-            //if (found)
-            //{
-            //    break;
-            //}
-
-            std::cout << "HTTP transfer completed with status " << msg->data.result << '\n';
+            std::cout << "HTTP transfer completed with status " << static_cast<int>(message.data.result) << '\n';
         }
+
+        std::cout << "Multi Info Read Iteration #" << i << '\n';
+
+        std::tie(message, messages_left) = multi_handle->info_read();
     }
+
+    std::cout << "Result of operation: \n" << ss.str() << std::endl;
 
     return 0;
 }

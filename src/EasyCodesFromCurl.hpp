@@ -112,10 +112,10 @@ static constexpr std::array s_conv_table
     std::pair(CURLE_QUIC_CONNECT_ERROR, EasyCode::QUIC_CONNECT_ERROR ),
     std::pair(CURLE_PROXY, EasyCode::PROXY ),
     std::pair(CURLE_SSL_CLIENTCERT, EasyCode::SSL_CLIENTCERT ),
-    std::pair(CURLE_UNRECOVERABLE_POLL, EasyCode::UNRECOVERABLE_POLL ),
-    std::pair(CURLE_TOO_LARGE, EasyCode::TOO_LARGE ),
-    std::pair(CURLE_ECH_REQUIRED, EasyCode::ECH_REQUIRED ),
-    std::pair(CURL_LAST, EasyCode::LAST )
+    std::pair(CURLE_UNRECOVERABLE_POLL, EasyCode::UNRECOVERABLE_POLL )
+    //std::pair(CURLE_TOO_LARGE, EasyCode::TOO_LARGE ),
+    //std::pair(CURLE_ECH_REQUIRED, EasyCode::ECH_REQUIRED ),
+    //std::pair(CURL_LAST, EasyCode::LAST )
 };
 
 } // namespace EasyCodesFromCurl

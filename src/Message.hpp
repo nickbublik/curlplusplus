@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EasyHandle.hpp"
+#include "EasyCodes.hpp"
 
 namespace CurlWrapper
 {
@@ -12,7 +13,7 @@ struct Message
 
     union {
         void *whatever;    /* message-specific data */
-        CURLcode result;   /* return code for transfer */
+        EasyCode result;   /* return code for transfer */
     } data;
 };
 

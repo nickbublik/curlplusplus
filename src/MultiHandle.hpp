@@ -3,6 +3,7 @@
 #include <memory>
 #include <chrono>
 
+#include "Message.hpp"
 #include "MultiCodes.hpp"
 #include "EasyHandle.hpp"
 
@@ -36,6 +37,8 @@ public:
     ///   MultiCode is code on this operation 
     ///
     MultiCode poll(const std::chrono::milliseconds& timeout) noexcept;
+
+    std::pair<Message, unsigned> info_read() noexcept;
 
 private:
     std::unique_ptr<Impl> m_impl;
